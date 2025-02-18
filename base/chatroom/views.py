@@ -5,20 +5,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from .forms import *
 # from django.contrib.auth import get_user_model
 
 # User = get_user_model()
 
 # Create your views here.
 
-def Header(request):
-    pk = request.user.id
-    user = CustomUser.objects.get(id=pk)
-    useremail = user.email.split('@')[0]
-    print(useremail)
-
-    return render(request, 'header.html', {'useremail': useremail})
 
 def LoginPage(request):
     page = 'login'
@@ -39,18 +31,17 @@ def LoginPage(request):
     context = {'page' : page}
     return render(request, 'loginRegister.html', context)
 
-def home(request):
-    return render(request, 'home.html')
 
 def LogoutUser(request):
     logout(request)
     return redirect('login')
 
+
 def RegisterPage(request):
     if request.method == "POST":
-        username = request.POST.get('username', '').strip().lower()
-        email = request.POST.get('email', '').strip().lower()
-        password = request.POST.get('password', '')
+        username = request.POST.get('username').strip().lower()
+        email = request.POST.get('email').strip().lower()
+        password = request.POST.get('password')
 
         if CustomUser.objects.filter(email=email).exists():
             messages.info(request, 'This email is already registered!')
@@ -67,6 +58,81 @@ def RegisterPage(request):
         return redirect('home')
 
     return render(request, 'loginRegister.html', {'page': 'register'})
+
+
+def home(request):
+    if request.GET.get('search') != None:
+        search = request.GET.get('search')
+    else:
+        search = ''
+
+    rooms = Room.objects.filter(
+        Q(topic__name__icontains = search) |
+        Q(name__icontains = search) |
+        Q(description__icontains = search)
+    )
+
+    topics = Topic.objects.all()[0:5]
+    room_count = rooms.count()
+    room_messages = Message.objects.filter(
+        Q(room__topic__name__icontains = search)
+    )[0:3]
+
+    context = {
+        'topics' : topics,
+        'rooms' : rooms,
+        'room_count' : room_count,
+        'room_messages' : room_messages
+    }
+    return render(request, 'home.html', context)
+
+
+
+def RoomPage(request,id):
+
+    room = Room.objects.get(id=id)
+    room_messages = room.roommessage.all()
+    members = room.members.all()
+
+    if request.method == 'POST':
+        messages = Message.objects.create(
+            user = request.user,
+            room = room,
+            comment = request.POST.get('comment')
+        )
+        room.members.add(request.user)
+        return redirect('room', id = room.id)
+
+    context = {
+        'room' : room,
+        'room_messages' : room_messages,
+        'members' : members
+    }
+    return render(request, 'room.html', context)
+
+
+@login_required(login_url='login')
+def CreateRoom(request):
+    topics = Topic.objects.all()
+    if request.method == 'POST':
+        data = request.POST
+        topic_new = data.get('topic')
+        topic, created = Topic.objects.get_or_create(name=topic_new)
+
+        Room.objects.create(
+            host = request.user,
+            topic = topic,
+            name = data.get('room_name'),
+            description = data.get('room_about'),
+        )
+        messages.success(request, 'Room created successfully!')
+        return redirect('home')
+
+    context = {
+        "topics" : topics,
+    }
+    return render(request, 'create-room.html', context)
+
 
 @login_required(login_url='login')
 def UpdatUser(request,id):
@@ -89,10 +155,56 @@ def UpdatUser(request,id):
 
         updateuser.save()
         messages.success(request, 'User account has been successfully updated!')
-        return redirect('home')
+        return redirect('userprofile' , id = updateuser.id)
 
     return render(request, 'update-user.html', {'user':updateuser})
 
+
+def UserProfile(request,id):
+    user = CustomUser.objects.get(id=id)
+
+    return render(request, 'userprofile.html', {'user': user})
+
+
+def TopicsPage(request):
+    search = request.GET.get('search') if request.GET.get('search') != None else ''
+    topics = Topic.objects.filter(name__icontains = search)
+
+    return render(request, 'topics.html', {'topics' : topics})
+
+def ActivitiesPage(request):
+    room_messages = Message.objects.all()
+
+    return render(request, 'activities.html', {'room_messages' : room_messages})
+
+
+@login_required(login_url='login')
+def DeleteRoom(request,pk):
+    room = Room.objects.get(id=pk)
+
+    if request.user != room.host:
+        return HttpResponse('Your are not allowed here!')
+
+    if request.method == 'POST':
+        room.delete()
+        messages.warning(request, 'Room created successfully!')
+        return redirect('home')
+
+    return render(request, 'delete.html', {'delete' : room})
+
+@login_required(login_url='login')
+def DeleteMessage(request,pk):
+    review = Message.objects.get(id=pk)
+
+    if request.user != review.user:
+        return HttpResponse('Your are not allowed here!')
+
+    if request.method == 'POST':
+        review.delete()
+        messages.warning(request, 'Room created successfully!')
+        return redirect('home')
+
+    return render(request, 'delete.html', {'delete' : review})
 
 # def Home(request):
 #     q = request.GET.get('q') if request.GET.get('q') != None else ''
