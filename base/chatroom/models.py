@@ -72,7 +72,7 @@ class Room(models.Model):
         return self.name
 
 class Message(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, related_name='usermessage', on_delete=models.CASCADE)
     room = models.ForeignKey(Room, related_name='roommessage', on_delete=models.CASCADE)
     comment = models.TextField()
     updated = models.DateTimeField(auto_now=True)

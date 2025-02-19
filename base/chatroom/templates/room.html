@@ -22,7 +22,7 @@
 
             {% if room.host == request.user %}
             <div class="room__topRight">
-              <a href="#">
+              <a href="{% url 'updateroom' room.id %}">
                 <svg
                   enable-background="new 0 0 24 24"
                   height="32"
@@ -133,19 +133,22 @@
               </div>
             </div>
           </div>
+
+          {% if request.user.is_authenticated %}
           <div class="room__message">
-            <form method="POST">
+            <form action="" method="POST">
               {% csrf_token %}
-            </form>
               <input name="comment" placeholder="Write your message here..." />
             </form>
           </div>
+          {% endif %}
+
         </div>
         <!-- Room End -->
 
         <!--   Start -->
         <div class="participants">
-          <h3 class="participants__top">Members <span>({{ member.count }} Joined)</span></h3>
+          <h3 class="participants__top">Members <span>({{ members.count }} Joined)</span></h3>
           <div class="participants__list scroll">
 
           {% for member in members %}
@@ -154,7 +157,7 @@
                 <img src="{{ member.user_profile.url }}" />
               </div>
               <p>
-                {% if message.user.name %}
+                {% if member.name %}
                   {{member.name}}
                   <span>@{{member.name}}</span>
                 {% else %}

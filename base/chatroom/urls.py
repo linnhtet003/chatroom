@@ -11,6 +11,7 @@ urlpatterns = [
 
     path('createroom', views.CreateRoom, name = 'createroom'),
     path('room/<int:id>', views.RoomPage, name = 'room'),
+    path('updateroom/<int:id>', views.UpdateRoom, name = 'updateroom'),
     path('delete-room/<int:pk>', views.DeleteRoom, name = 'delete-room'),
 
     path('topics', views.TopicsPage, name = 'topics'),
