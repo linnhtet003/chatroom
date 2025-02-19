@@ -42,9 +42,14 @@ def RegisterPage(request):
         username = request.POST.get('username').strip().lower()
         email = request.POST.get('email').strip().lower()
         password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
 
         if CustomUser.objects.filter(email=email).exists():
             messages.info(request, 'This email is already registered!')
+            return redirect('register')
+
+        if password != confirm_password:
+            messages.warning(request, 'Password do not match!')
             return redirect('register')
 
         # Create user using create_user() from CustomUserManager
@@ -85,7 +90,6 @@ def home(request):
         'room_messages' : room_messages
     }
     return render(request, 'home.html', context)
-
 
 
 def RoomPage(request,id):

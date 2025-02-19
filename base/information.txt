@@ -1,0 +1,12 @@
+superuser email => mgmg@gmail.com
+superuser password => superuser
+
+normal user email => myomyo@gmail.com
+                     linn@gmail.com
+                     phyo@gmail.com
+                     nini@gmail.com
+                     ayeaye@gmail.com
+                     aungaung@gmail.com
+                     koko@gmail.com
+
+all of normal user password => superuser
