@@ -212,7 +212,7 @@ def DeleteRoom(request,pk):
 
     if request.method == 'POST':
         room.delete()
-        messages.warning(request, 'Room created successfully!')
+        messages.warning(request, 'Room deleted successfully!')
         return redirect('home')
 
     return render(request, 'delete.html', {'delete' : room})
@@ -227,7 +227,7 @@ def DeleteMessage(request,pk):
 
     if request.method == 'POST':
         review.delete()
-        messages.warning(request, 'Room created successfully!')
+        messages.warning(request, 'Message deleted successfully!')
         return redirect('home')
 
     return render(request, 'delete.html', {'delete' : review})

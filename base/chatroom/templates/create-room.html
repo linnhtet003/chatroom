@@ -28,12 +28,12 @@
             {% csrf_token %}
             <div class="form__group">
               <label for="room_name">Room Name</label>
-              <input id="room_name" name="room_name" value="{{ room.name }}" type="text" placeholder="write you room name" />
+              <input id="room_name" name="room_name" value="{{ room.name }}" type="text" placeholder="write you room name" required/>
             </div>
 
             <div class="form__group">
               <label for="room_topic">Topic</label>
-              <input required type="text" name="topic" id="room_topic" value="{{ room.topic }}" list="topic-list" />
+              <input required type="text" name="topic" id="room_topic" value="{{ room.topic }}" list="topic-list" required/>
               <datalist id="topic-list">
                 <select id="room_topic">
                   <option value="">Select your topic</option>
